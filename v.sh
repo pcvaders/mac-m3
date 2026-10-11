@@ -46,7 +46,7 @@ fi
 if [ -s "$LOG" ]; then
   echo
   echo "Copy errors by type (count  message):"
-  awk '!/^--- run started/ { n = split($0, a, ": "); m = a[n]; sub(/[ \t]+$/, "", m); e[m]++ }
+  awk '!/^--- / { n = split($0, a, ": "); m = a[n]; sub(/[ \t]+$/, "", m); e[m]++ }
        END { for (m in e) printf "%8d  %s\n", e[m], m }' "$LOG" | sort -rn | head -10
 fi
 
