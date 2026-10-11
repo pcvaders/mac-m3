@@ -109,7 +109,8 @@ echo "$(grep -c '\.app' "$L/installed-apps.txt") apps listed"
 say "6/6 Checking for missing files (takes a few minutes)"
 ( cd "$S" && find . -type f 2>/dev/null | sort ) > "$L/source-list.txt"
 ( cd "$B" && find . -type f 2>/dev/null | sort ) > "$L/backup-list.txt"
-diff "$L/source-list.txt" "$L/backup-list.txt" | grep '^<' | sed 's/^< //' \
+# Recovery has no diff/comm, so compare with awk.
+awk 'NR==FNR { b[$0]; next } !($0 in b)' "$L/backup-list.txt" "$L/source-list.txt" \
   | grep -v -e '^\./Library/Caches/' -e '/\.DS_Store$' > "$L/missing-files.txt"
 
 src=$(wc -l < "$L/source-list.txt" | tr -d ' ')
