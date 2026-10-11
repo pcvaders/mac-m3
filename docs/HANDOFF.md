@@ -20,9 +20,28 @@ Read `docs/MacBook-M3.md` in this repo for the full case history. This file is t
 The goal is to get everything back **and** find out what, if anything, brings the loop back. After each stage: **restart, log in, confirm the desktop loads.**
 
 0. **Account.** Create an admin user with Account name **`voyager1`** (the old short name, lowercase), so hard-coded `/Users/voyager1` paths in dotfiles, project configs and Syncthing keep working. Do all later stages logged in as `voyager1`. Sign in to the Apple ID only in this account, which brings back iCloud Keychain. The old local keychain is at `Library/Keychains/login.keychain-db` in the backup and unlocks with the old login password. Delete the temporary setup account at the end.
-1. **Files.** Run `x.sh` (below) while logged in as `voyager1`. It copies every top-level item except `Library`, plus `.ssh`, `.gitconfig` and the shell profiles. It skips caches and other dotfiles.
-2. **Apps without system components:** reinstall from `installed-apps.txt`, in batches.
-3. **Apps with system components, one at a time with a restart after each.** These are the main suspects:
+1. **Files only.** Run `x.sh` (below) while logged in as `voyager1`. It copies your documents, projects and media, plus `.ssh`, `.gitconfig` and the shell profiles. It **never** copies software or regenerable clutter:
+   - every `*.app` bundle, `~/Applications`, and all of `~/Library`
+   - caches and dependency or build folders: `.cache`, `node_modules`, `venv`/`.venv`, `__pycache__`, `DerivedData`, `.gradle`, `.next`, …
+   - top-level `tmp/` and `venv/`
+
+   After it runs, recreate each project's dependencies (`npm`/`pnpm`/`bun install`, new venvs) rather than copying old ones.
+2. **Fresh software: latest versions from official sources only.** This is the rule for every app and tool:
+   - **Never** reinstall from the backup. Never copy `.app` bundles from the Lexar or the old `/Applications`. Never run old installers (`.dmg`/`.pkg`) found in the restored Downloads folder.
+   - **First build a checklist** in `~/restore-apps.md` from `/Volumes/Lex4TB/M3 Backup Oct26/installed-apps.txt`, with one row per app:
+     - name and old version
+     - source (Mac App Store / Homebrew cask / vendor site or manager)
+     - current latest version
+     - whether it supports **macOS 27** (check the vendor's release notes)
+     - installed? and restart-tested?
+
+     Drop apps that are no longer wanted.
+   - **Where to get each app:**
+     - **App Store apps:** App Store → Purchased.
+     - **Homebrew:** install Homebrew fresh, then `brew install` / `brew install --cask` by name. That always fetches the current official build. **Do not** copy the old `/opt/homebrew`.
+     - **Vendor apps:** download from the vendor's own site or manager. That means Adobe Creative Cloud, Microsoft 365 / AutoUpdate, Native Instruments Native Access, Arturia Software Center, XLN Online Installer, Pioneer rekordbox, Docker Desktop, Steam and so on. Signing in to each vendor account restores licences.
+   - **Install in batches,** apps **without** system components first, and restart and test login after each batch.
+3. **Apps with system components: latest version, one at a time, restart after each.** These are the main suspects for the original loop. Install each only once its vendor lists **macOS 27 support**. Skip any that aren't needed:
    - Background Music (BGM audio driver)
    - NewTek NDI virtual camera
    - Little Snitch
@@ -31,8 +50,14 @@ The goal is to get everything back **and** find out what, if anything, brings th
    - CleverFiles / Disk Drill
    - SAT SMART driver
    - (also: Arturia, XLN, Adobe and Microsoft helpers)
-4. **App data from the old `~/Library`, selectively, per app.** Never restore the whole of `Library`, `LaunchAgents`/`LaunchDaemons`, or `Preferences/ByHost`. Restore Syncthing's folder (`Library/Application Support/Syncthing`) with Syncthing stopped, so the device keeps its ID.
-5. **Sign in to your Apple ID last,** as its own stage.
+4. **App data from the old `~/Library`: selectively, per app, and only after that app has been freshly installed and launched once.** Only bring back real user data, such as libraries, projects, presets and licence files where re-activation isn't possible, and only when the app can't re-sync it from its account. Never restore:
+   - `Caches`, `Logs`, `Saved Application State`, `HTTPStorages` or `WebKit` caches
+   - the whole of `Library`
+   - `LaunchAgents`/`LaunchDaemons`
+   - `Preferences/ByHost`, or old preference plists in bulk
+
+   Restore Syncthing's folder (`Library/Application Support/Syncthing`) with Syncthing stopped, so the device keeps its ID.
+5. **Apple ID / iCloud.** You're already signed in. Keep iCloud Drive "Desktop & Documents Folders" off until stage 1 is done, then decide.
 
 If the loop returns, the last thing added is the cause. Boot Recovery, remove it, and record it in `docs/MacBook-M3.md`.
 
@@ -42,7 +67,7 @@ If the loop returns, the last thing added is the cause. Boot Recovery, remove it
 curl -fsSL https://raw.githubusercontent.com/pcvaders/mac-m3/backup/x.sh -o ~/x.sh && bash ~/x.sh
 ```
 
-It lists what it will copy and waits for you to type `yes`. If macOS asks for access to the removable volume, allow it. Errors go to `~/restore-log.txt`.
+It lists what it will copy (and what it skips) and waits for you to type `yes`. It needs `rsync`, which macOS includes. If macOS asks for access to the removable volume, allow it. Errors go to `~/restore-log.txt`.
 
 ## Cautions
 
@@ -63,7 +88,7 @@ It lists what it will copy and waits for you to type `yes`. If macOS asks for ac
 
 | Script | Where | Purpose |
 |---|---|---|
-| `x.sh` | normal macOS | Stage 1 restore of files from the Lexar |
+| `x.sh` | normal macOS | Stage 1 restore of files only (no apps, caches or dependency folders) |
 | `b.sh`, `r.sh`, `v.sh` | Recovery | Make, top up and verify the backup (done) |
 | `d.sh`, `s.sh` | Recovery | Diagnostics and crash analysis (done) |
 | `w.sh`, `c.sh` | Recovery | Reversible display-prefs / container disable (not needed now) |
