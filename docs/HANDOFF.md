@@ -19,7 +19,8 @@ Read `docs/MacBook-M3.md` in this repo for the full case history. This file is t
 
 The goal is to get everything back **and** find out what, if anything, brings the loop back. After each stage: **restart, log in, confirm the desktop loads.**
 
-1. **Files.** Run `x.sh` (below). It copies every top-level item except `Library`, plus `.ssh`, `.gitconfig` and the shell profiles. It skips caches and other dotfiles.
+0. **Account.** Create an admin user with Account name **`voyager1`** (the old short name, lowercase), so hard-coded `/Users/voyager1` paths in dotfiles, project configs and Syncthing keep working. Do all later stages logged in as `voyager1`. Sign in to the Apple ID only in this account, which brings back iCloud Keychain. The old local keychain is at `Library/Keychains/login.keychain-db` in the backup and unlocks with the old login password. Delete the temporary setup account at the end.
+1. **Files.** Run `x.sh` (below) while logged in as `voyager1`. It copies every top-level item except `Library`, plus `.ssh`, `.gitconfig` and the shell profiles. It skips caches and other dotfiles.
 2. **Apps without system components:** reinstall from `installed-apps.txt`, in batches.
 3. **Apps with system components, one at a time with a restart after each.** These are the main suspects:
    - Background Music (BGM audio driver)
