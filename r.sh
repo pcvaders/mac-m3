@@ -48,7 +48,7 @@ done
 echo
 echo "=== 3/3 Re-checking the backup (takes a few minutes) ==="
 ( cd "$B" && find . -type f 2>/dev/null | sort ) > "$L/backup-list.txt"
-if [ ! -f "$VOL/v.sh" ]; then
-  curl -fsSL https://raw.githubusercontent.com/pcvaders/mac-m3/backup/v.sh -o "$VOL/v.sh"
-fi
+# Fetch the latest checker; fall back to the copy already on the Lexar.
+curl -fsSL https://raw.githubusercontent.com/pcvaders/mac-m3/backup/v.sh -o "$VOL/v.sh.new" \
+  && mv "$VOL/v.sh.new" "$VOL/v.sh"
 bash "$VOL/v.sh"
