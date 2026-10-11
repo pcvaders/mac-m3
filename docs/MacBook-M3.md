@@ -94,6 +94,26 @@ curl -fsSL https://raw.githubusercontent.com/pcvaders/mac-m3/backup/<name>.sh -o
 | `w.sh` | Reversibly move WindowServer display prefs aside (`undo` supported) |
 | `c.sh` | Reversibly disable the Apple `container` data and launch items (not needed in the end) |
 
+## Outcome (11 Oct 2026)
+
+Erasing the disk and reinstalling **macOS Tahoe 26.7.1** (public) from Recovery fixed it: login and the desktop work.
+
+**What this proves:** the hardware (M3, display, SSD) is fine.
+
+**What it doesn't prove:** the erase removed the 27.2 beta *and* everything on the old disk at the same time, so we can't say which one caused the loop. Ruled out along the way:
+
+- kernel extensions (Full Security)
+- display prefs (`w.sh`)
+- peripherals
+- a single user account (Safe Mode and a second admin account looped too)
+
+Remaining suspects:
+
+1. a 27.2-beta WindowServer/display-firmware bug
+2. third-party system software restored onto the disk (BGM audio driver, NDI virtual camera, Little Snitch, EaseUS NTFS, Docker, …)
+
+**How to narrow it down from here:** upgrade to public 27.0.1 on the clean system, then restore files and reinstall apps in stages, restarting after each piece of system-level software. If the loop comes back, the last thing added is the cause. If it never does, the beta was the cause.
+
 ## Next steps
 
 1. Unplug the Lexar. Erase **Macintosh HD** (APFS, Erase Volume Group). Choose **Reinstall macOS Tahoe** (public).
